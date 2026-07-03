@@ -163,6 +163,70 @@
   .lost-flex > div:first-child { margin: 0 auto; }
   .lost-info { flex: 1; min-width: 260px; }
 
+  /* 摇签 */
+  .qian-stage { text-align: center; padding: 8px 0 2px; }
+  .tube-wrap { position: relative; width: 150px; height: 235px; margin: 0 auto; cursor: pointer; transform-origin: 50% 90%; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  .tube-wrap.rock { animation: rock .34s ease; }
+  @keyframes rock { 0% { transform: rotate(0); } 25% { transform: rotate(-8deg); } 60% { transform: rotate(7deg); } 100% { transform: rotate(0); } }
+  .tube {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 118px; height: 150px; z-index: 2;
+    background: linear-gradient(90deg, #5d3f1a, #8a6130 18%, #b98a4a 45%, #9a713a 65%, #6b4a20 100%);
+    border-radius: 10px 10px 16px 16px / 8px 8px 18px 18px;
+    box-shadow: inset 0 10px 12px rgba(0,0,0,.45), inset 0 -6px 8px rgba(0,0,0,.3), 0 8px 16px rgba(0,0,0,.5);
+  }
+  .tube::before {
+    content: ""; position: absolute; top: -9px; left: -3px; right: -3px; height: 20px; border-radius: 50%;
+    background: linear-gradient(180deg, #2e2008, #6b4a20 70%); box-shadow: inset 0 3px 5px rgba(0,0,0,.7), 0 1px 1px rgba(240,208,120,.25);
+  }
+  .tube::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 14px; height: 7px;
+    background: linear-gradient(180deg, rgba(201,162,39,.55), rgba(139,106,26,.55));
+    box-shadow: 0 -108px 0 rgba(201,162,39,.35);
+  }
+  .tube-txt {
+    position: absolute; left: 50%; top: 30px; transform: translateX(-50%); z-index: 3;
+    writing-mode: vertical-rl; background: linear-gradient(180deg, #8c2f28, #6e1f1a);
+    color: #f0d078; font-size: 16px; letter-spacing: 7px; padding: 12px 6px 14px;
+    border-radius: 4px; border: 1px solid #a8863a; text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  }
+  .sticks { position: absolute; bottom: 148px; left: 50%; transform: translateX(-50%); width: 100px; height: 90px; z-index: 1; }
+  .stick {
+    position: absolute; bottom: 0; width: 9px; border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, #a8352c 0%, #a8352c 14%, #e0c184 15%, #c9a45e 100%);
+    box-shadow: 1px 0 2px rgba(0,0,0,.4);
+  }
+  .stick.s1 { left: 6px;  height: 62px; transform: rotate(-7deg); }
+  .stick.s2 { left: 19px; height: 78px; transform: rotate(-4deg); }
+  .stick.s3 { left: 32px; height: 68px; transform: rotate(-1deg); }
+  .stick.s4 { left: 45px; height: 84px; }
+  .stick.s5 { left: 58px; height: 71px; transform: rotate(2deg); }
+  .stick.s6 { left: 71px; height: 79px; transform: rotate(5deg); }
+  .stick.s7 { left: 84px; height: 64px; transform: rotate(8deg); }
+  .stick-fly {
+    position: absolute; bottom: 150px; left: 50%; margin-left: -6px; width: 12px; height: 88px; z-index: 0; opacity: 0;
+    background: linear-gradient(180deg, #b93b30 0%, #b93b30 16%, #ecd08f 17%, #d9b877 100%);
+    border-radius: 5px; box-shadow: 1px 1px 3px rgba(0,0,0,.45);
+    transition: transform .95s cubic-bezier(.2, .7, .3, 1), opacity .25s;
+  }
+  .stick-fly span { position: absolute; top: 2px; left: 0; right: 0; text-align: center; font-size: 9px; color: #ffeebb; }
+  .stick-fly.out { opacity: 1; z-index: 4; transform: translateY(-125px) rotate(15deg); }
+  .tube-shadow { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 132px; height: 14px; background: radial-gradient(ellipse, rgba(0,0,0,.55), transparent 70%); }
+  .qian-status { color: var(--gold); margin: 12px 0 4px; letter-spacing: 2px; font-size: 15px; min-height: 22px; }
+  #qian-result { perspective: 900px; }
+  .qian-card { max-width: 430px; margin: 0 auto 18px; text-align: center; border-width: 2px; border-color: var(--gold-soft); animation: flipIn .7s ease; }
+  @keyframes flipIn { from { transform: rotateX(75deg) translateY(-28px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .qian-head { display: flex; justify-content: space-between; align-items: center; }
+  .qian-no { font-size: 20px; color: var(--gold); letter-spacing: 3px; }
+  .qian-lvl { padding: 3px 12px; border-radius: 4px; font-size: 15px; letter-spacing: 2px; border: 1px solid; }
+  .qian-lvl.good { color: var(--gold); border-color: var(--gold); background: rgba(201,162,39,.12); }
+  .qian-lvl.mid { color: var(--ink); border-color: var(--gold-soft); }
+  .qian-lvl.warn { color: #d98a84; border-color: var(--red); background: rgba(181,68,60,.12); }
+  .qian-gua { margin-top: 10px; color: var(--ink-dim); font-size: 15px; letter-spacing: 1px; }
+  .qian-poem { margin: 14px 0 4px; padding: 14px 6px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .qian-poem div { font-size: 18px; letter-spacing: 5px; line-height: 2.15; font-family: "Kaiti SC", "KaiTi", "STKaiti", "Noto Serif SC", serif; }
+  .qian-sec { text-align: left; margin-top: 10px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; line-height: 1.8; font-size: 15px; }
+  .qian-sec b { color: var(--gold); margin-right: 8px; letter-spacing: 2px; }
+
   /* 六十四卦浏览 */
   .gua-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
   .gua-cell {
@@ -248,6 +312,7 @@
     <button class="tab" data-tab="time">时间起卦</button>
     <button class="tab" data-tab="num">数字起卦</button>
     <button class="tab" data-tab="lost">寻物占</button>
+    <button class="tab" data-tab="qian">摇 签</button>
     <button class="tab" data-tab="browse">六十四卦</button>
   </div>
 
@@ -341,6 +406,33 @@
     <div id="lost-result"></div>
   </div>
 
+  <!-- 摇签 -->
+  <div class="panel" id="panel-qian">
+    <div class="card">
+      <h3>周易灵签 · 诚心则应</h3>
+      <div class="question-row">
+        <input type="text" id="qian-question" placeholder="所求何事（可不填）：如事业、姻缘、考试、求财……" maxlength="60">
+      </div>
+      <div class="qian-stage">
+        <div class="tube-wrap" id="tube-wrap">
+          <div class="stick-fly" id="stick-fly"><span>签</span></div>
+          <div class="sticks">
+            <i class="stick s1"></i><i class="stick s2"></i><i class="stick s3"></i><i class="stick s4"></i><i class="stick s5"></i><i class="stick s6"></i><i class="stick s7"></i>
+          </div>
+          <div class="tube"><span class="tube-txt">周易灵签</span></div>
+          <div class="tube-shadow"></div>
+        </div>
+        <div class="qian-status" id="qian-status">默念所求之事，摇动手机或连点签筒（0 / 5）</div>
+        <div class="btn-row">
+          <button class="btn" id="btn-qian-motion">开启手机摇一摇</button>
+          <button class="btn ghost" id="btn-qian-reset">重 摇</button>
+        </div>
+        <div class="hint" style="text-align:center">手机上点「开启手机摇一摇」授权后，摇晃手机即可；电脑上直接连续点击签筒。摇满五下，灵签自出。</div>
+      </div>
+    </div>
+    <div id="qian-result"></div>
+  </div>
+
   <!-- 六十四卦浏览 -->
   <div class="panel" id="panel-browse">
     <div class="card">
@@ -366,6 +458,7 @@
 <script src="data-17-32.js"></script>
 <script src="data-33-48.js"></script>
 <script src="data-49-64.js"></script>
+<script src="data-qian.js"></script>
 <script>
 (function () {
   var DATA = window.GUA_DATA || {};
@@ -824,6 +917,107 @@
       "时间起卦 · " + d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日 " + ZHI[hourZhi - 1] + "时");
   });
 
+  /* ---------- 摇签 ---------- */
+  var CN_NUM = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+  function toCN(n) {
+    if (n < 10) return CN_NUM[n];
+    if (n < 20) return "十" + (n % 10 ? CN_NUM[n % 10] : "");
+    return CN_NUM[Math.floor(n / 10)] + "十" + (n % 10 ? CN_NUM[n % 10] : "");
+  }
+  function qianLevel(g) {
+    var s = scoreText(g.guaci);
+    if (s >= 4) return { n: "上上签", cls: "good" };
+    if (s >= 2) return { n: "上签", cls: "good" };
+    if (s >= 0) return { n: "中签", cls: "mid" };
+    if (s >= -2) return { n: "中下签", cls: "warn" };
+    return { n: "下签", cls: "warn" };
+  }
+  var SHAKE_NEED = 5, qianCount = 0, qianDrawing = false, qianDone = false, lastShakeT = 0, motionOn = false;
+  var tubeWrap = document.getElementById("tube-wrap");
+  var qianStatus = document.getElementById("qian-status");
+  function qianStatusTxt() {
+    qianStatus.textContent = qianDone ? "灵签已出，点「重摇」可再求一签"
+      : "已摇 " + qianCount + " / " + SHAKE_NEED + (motionOn ? "，继续摇动手机" : "，继续点击签筒");
+  }
+  function qianShake() {
+    if (qianDrawing || qianDone) return;
+    if (!document.getElementById("panel-qian").classList.contains("active")) return;
+    qianCount++;
+    tubeWrap.classList.remove("rock"); void tubeWrap.offsetWidth; tubeWrap.classList.add("rock");
+    if (navigator.vibrate) navigator.vibrate(45);
+    if (qianCount >= SHAKE_NEED) drawQian(); else qianStatusTxt();
+  }
+  function drawQian() {
+    qianDrawing = true;
+    qianStatus.textContent = "签动矣——";
+    if (navigator.vibrate) navigator.vibrate([60, 40, 160]);
+    document.getElementById("stick-fly").classList.add("out");
+    setTimeout(function () {
+      var n = Math.floor(Math.random() * 64) + 1;
+      var box = document.getElementById("qian-result");
+      box.innerHTML = qianCardHTML(DATA[n], document.getElementById("qian-question").value.trim());
+      box.scrollIntoView({ behavior: "smooth", block: "start" });
+      qianDrawing = false; qianDone = true; qianStatusTxt();
+    }, 950);
+  }
+  function qianCardHTML(g, question) {
+    var lvl = qianLevel(g);
+    var poem = (window.QIAN_POEMS && window.QIAN_POEMS[g.n]) || [g.guaci];
+    var cat = detectCat(question);
+    var field = cat ? (CAT_FIELD[cat.key] || "overall") : "overall";
+    var s = scoreText(g.guaci), lv;
+    for (var i = 0; i < LEVELS.length; i++) { if (s >= LEVELS[i].min) { lv = LEVELS[i]; break; } }
+    var h = '<div class="card qian-card">';
+    h += '<div class="qian-head"><span class="qian-no">第' + toCN(g.n) + '签</span><span class="qian-lvl ' + lvl.cls + '">' + lvl.n + "</span></div>";
+    h += '<div class="qian-gua">' + g.symbol + " " + g.full + " · " + g.brief + "</div>";
+    h += '<div class="qian-poem">' + poem.map(function (l) { return "<div>" + l + "</div>"; }).join("") + "</div>";
+    h += '<div class="qian-sec"><b>解曰</b>' + (g.interp ? g.interp.overall : "") + "</div>";
+    h += '<div class="qian-sec"><b>' + (cat ? "所求 · " + cat.label : "综合运势") + "</b>" +
+      (question ? "「" + escapeHTML(question) + "」——" : "") + (cat ? "就此事而言，" : "") + lv.text + "</div>";
+    h += '<div class="qian-sec"><b>指点</b>' + (g.interp ? g.interp[field] : "") + "</div>";
+    h += '<div class="btn-row"><button class="btn ghost" data-opengua="' + g.n + '">看此卦详解</button></div></div>';
+    return h;
+  }
+  tubeWrap.addEventListener("click", qianShake);
+  document.getElementById("btn-qian-reset").addEventListener("click", function () {
+    qianCount = 0; qianDone = false; qianDrawing = false;
+    document.getElementById("stick-fly").classList.remove("out");
+    document.getElementById("qian-result").innerHTML = "";
+    qianStatus.textContent = "默念所求之事，摇动手机或连点签筒（0 / " + SHAKE_NEED + "）";
+  });
+  document.getElementById("qian-result").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-opengua]");
+    if (b) openGua(+b.getAttribute("data-opengua"));
+  });
+  function onMotion(e) {
+    var a = e.accelerationIncludingGravity;
+    if (!a || a.x == null) return;
+    var mag = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    var now = Date.now();
+    if (Math.abs(mag - 9.81) > 8 && now - lastShakeT > 500) { lastShakeT = now; qianShake(); }
+  }
+  var motionBtn = document.getElementById("btn-qian-motion");
+  function startMotion() {
+    window.addEventListener("devicemotion", onMotion);
+    motionOn = true;
+    motionBtn.textContent = "摇一摇已开启";
+    motionBtn.disabled = true;
+    qianStatusTxt();
+  }
+  if (!("ontouchstart" in window) || typeof DeviceMotionEvent === "undefined") {
+    motionBtn.style.display = "none";
+  }
+  motionBtn.addEventListener("click", function () {
+    if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+      DeviceMotionEvent.requestPermission().then(function (state) {
+        if (state === "granted") startMotion();
+        else qianStatus.textContent = "未获授权，可直接连点签筒摇签";
+      }).catch(function () { qianStatus.textContent = "授权失败，可直接连点签筒摇签"; });
+    } else if (typeof DeviceMotionEvent !== "undefined") {
+      startMotion();
+    }
+  });
+
   /* ---------- 六十四卦浏览 ---------- */
   var grid = document.getElementById("gua-grid");
   var cells = "";
@@ -834,10 +1028,8 @@
       '</div><div class="nm">' + g.full + '</div><div class="no">第' + i + "卦</div></div>";
   }
   grid.innerHTML = cells || '<div class="hint">卦库数据未加载，请确认 data-*.js 与本页在同一文件夹。</div>';
-  grid.addEventListener("click", function (e) {
-    var cell = e.target.closest(".gua-cell");
-    if (!cell) return;
-    var g = DATA[+cell.dataset.n];
+  function openGua(n) {
+    var g = DATA[n];
     if (!g) return;
     document.getElementById("modal-body").innerHTML =
       '<div class="msym">' + g.symbol + "</div><h2>" + g.full + "</h2>" +
@@ -847,6 +1039,10 @@
       interpHTML(g) +
       '<h3 style="color:var(--gold);margin:16px 0 4px;letter-spacing:2px">六爻爻辞</h3>' + yaoListHTML(g, []);
     document.getElementById("modal-mask").classList.add("show");
+  }
+  grid.addEventListener("click", function (e) {
+    var cell = e.target.closest(".gua-cell");
+    if (cell) openGua(+cell.dataset.n);
   });
   document.getElementById("modal-close").addEventListener("click", function () {
     document.getElementById("modal-mask").classList.remove("show");
