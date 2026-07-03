@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#16130f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>周易占卜 · 六十四卦</title>
+<style>
+  :root {
+    --bg: #16130f;
+    --bg-card: #211c15;
+    --bg-soft: #2a241b;
+    --gold: #c9a227;
+    --gold-soft: #a8863a;
+    --ink: #e8ddc8;
+    --ink-dim: #a49a85;
+    --red: #b5443c;
+    --line: #3a3327;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 50% -10%, #2b241a 0%, var(--bg) 60%);
+    color: var(--ink);
+    font-family: "Kaiti SC", "KaiTi", "STKaiti", "Noto Serif SC", "SimSun", serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  header { text-align: center; padding: 28px 0 18px; }
+  .taiji {
+    width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 50%;
+    background: linear-gradient(90deg, var(--ink) 50%, #111 50%);
+    position: relative; border: 1px solid var(--gold-soft);
+    animation: spin 24s linear infinite;
+  }
+  .taiji::before, .taiji::after {
+    content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+    width: 27px; height: 27px; border-radius: 50%;
+  }
+  .taiji::before { top: 0; background: radial-gradient(circle at center, #111 18%, var(--ink) 19%); }
+  .taiji::after { bottom: 0; background: radial-gradient(circle at center, var(--ink) 18%, #111 19%); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  h1 { font-size: 34px; letter-spacing: 12px; text-indent: 12px; color: var(--gold); font-weight: 600; }
+  .subtitle { color: var(--ink-dim); margin-top: 8px; font-size: 14px; letter-spacing: 3px; }
+
+  .tabs { display: flex; justify-content: center; gap: 8px; margin: 22px 0; flex-wrap: wrap; }
+  .tab {
+    padding: 9px 22px; border: 1px solid var(--line); border-radius: 4px;
+    background: var(--bg-card); color: var(--ink-dim); cursor: pointer;
+    font-family: inherit; font-size: 16px; letter-spacing: 2px; transition: all .25s;
+  }
+  .tab:hover { border-color: var(--gold-soft); color: var(--ink); }
+  .tab.active { background: var(--gold); color: #1a1610; border-color: var(--gold); font-weight: 600; }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadein .4s; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 24px; margin-bottom: 18px;
+  }
+  .card h3 { color: var(--gold); font-size: 18px; letter-spacing: 3px; margin-bottom: 14px; border-left: 3px solid var(--gold); padding-left: 10px; }
+
+  .question-row { display: flex; gap: 10px; margin-bottom: 6px; }
+  input[type=text], input[type=number], input[type=date], select {
+    background: var(--bg-soft); border: 1px solid var(--line); color: var(--ink);
+    padding: 10px 12px; border-radius: 4px; font-family: inherit; font-size: 15px; outline: none;
+  }
+  input:focus, select:focus { border-color: var(--gold-soft); }
+  .question-row input[type=text] { flex: 1; }
+
+  .btn {
+    background: linear-gradient(180deg, #d4af37, #b08d1e); color: #221c10;
+    border: none; padding: 11px 28px; border-radius: 4px; cursor: pointer;
+    font-family: inherit; font-size: 16px; font-weight: 600; letter-spacing: 3px;
+    transition: filter .2s, transform .1s;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: scale(.97); }
+  .btn.ghost { background: transparent; border: 1px solid var(--gold-soft); color: var(--gold); font-weight: 400; }
+  .btn:disabled { filter: grayscale(.7); cursor: not-allowed; }
+
+  /* 铜钱 */
+  .coin-stage { text-align: center; padding: 8px 0 4px; }
+  .coins { display: flex; justify-content: center; gap: 22px; margin: 16px 0; min-height: 66px; }
+  .coin {
+    width: 62px; height: 62px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 30%, #e8c86a, #9a7418 70%);
+    border: 2px solid #6d5311; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; color: #3a2c08; font-weight: 700; position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,.5), inset 0 0 8px rgba(0,0,0,.25);
+  }
+  .coin::before {
+    content: ""; width: 18px; height: 18px; background: var(--bg-card);
+    border: 1px solid #6d5311; position: absolute;
+  }
+  .coin span { position: relative; z-index: 1; background: transparent; }
+  .coin.flip { animation: flip .5s ease; }
+  @keyframes flip { 0% { transform: rotateY(0) translateY(0); } 50% { transform: rotateY(540deg) translateY(-26px); } 100% { transform: rotateY(1080deg) translateY(0); } }
+  .toss-log { color: var(--ink-dim); font-size: 14px; min-height: 22px; letter-spacing: 1px; }
+  .toss-count { color: var(--gold); font-size: 15px; margin-top: 6px; letter-spacing: 2px; }
+  .btn-row { display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+
+  /* 卦象绘制 */
+  .gua-pair { display: flex; justify-content: center; gap: 46px; flex-wrap: wrap; align-items: flex-start; }
+  .gua-figure { text-align: center; }
+  .gua-figure .glabel { color: var(--ink-dim); font-size: 14px; letter-spacing: 3px; margin-bottom: 10px; }
+  .glines { display: flex; flex-direction: column-reverse; gap: 8px; align-items: center; }
+  .yao-row { display: flex; align-items: center; gap: 10px; height: 14px; }
+  .bar { width: 110px; height: 12px; display: flex; justify-content: space-between; }
+  .bar .seg { background: var(--ink); height: 100%; border-radius: 2px; }
+  .bar.yang .seg { width: 100%; }
+  .bar.yin .seg { width: 46px; }
+  .yao-row.moving .seg { background: var(--gold); box-shadow: 0 0 8px rgba(201,162,39,.6); }
+  .mark { width: 18px; color: var(--gold); font-size: 15px; text-align: left; }
+  .gua-title { margin-top: 14px; font-size: 22px; color: var(--gold); letter-spacing: 2px; }
+  .gua-sub { color: var(--ink-dim); font-size: 13px; margin-top: 4px; letter-spacing: 1px; }
+  .arrow { align-self: center; color: var(--gold-soft); font-size: 26px; padding-top: 40px; }
+
+  .classic { background: var(--bg-soft); border-left: 3px solid var(--gold-soft); padding: 12px 16px; border-radius: 0 4px 4px 0; margin: 10px 0; line-height: 1.9; }
+  .classic .tag { color: var(--gold); margin-right: 10px; }
+  .interp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 12px; }
+  .interp-item { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; line-height: 1.8; font-size: 15px; }
+  .interp-item b { color: var(--gold); letter-spacing: 2px; display: block; margin-bottom: 6px; font-size: 15px; }
+  .yao-list { margin-top: 8px; }
+  .yao-item { padding: 10px 14px; border-bottom: 1px dashed var(--line); line-height: 1.8; font-size: 15px; }
+  .yao-item:last-child { border-bottom: none; }
+  .yao-item.hot { background: rgba(201,162,39,.09); border-left: 3px solid var(--gold); border-radius: 0 4px 4px 0; }
+  .yao-item .yg { color: var(--ink-dim); font-size: 14px; }
+  .keynote { border: 1px solid var(--gold-soft); border-radius: 6px; padding: 14px 18px; line-height: 1.9; background: rgba(201,162,39,.06); }
+  .keynote b { color: var(--gold); }
+  .verdict { font-size: 17px; padding: 14px 18px; border-radius: 6px; margin: 12px 0; line-height: 1.9; border: 1px solid var(--line); }
+  .verdict .lv { font-weight: 700; letter-spacing: 2px; margin-right: 8px; }
+  .verdict.good { border-color: var(--gold); background: rgba(201,162,39,.10); }
+  .verdict.good .lv { color: var(--gold); }
+  .verdict.mid { border-color: var(--gold-soft); }
+  .verdict.mid .lv { color: var(--ink); }
+  .verdict.warn { border-color: var(--red); background: rgba(181,68,60,.10); }
+  .verdict.warn .lv { color: #d98a84; }
+  .lost-flex { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; margin-top: 12px; }
+  .lost-flex > div:first-child { margin: 0 auto; }
+  .lost-info { flex: 1; min-width: 260px; }
+
+  /* 六十四卦浏览 */
+  .gua-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+  .gua-cell {
+    background: var(--bg-soft); border: 1px solid var(--line); border-radius: 6px;
+    text-align: center; padding: 12px 4px; cursor: pointer; transition: all .2s;
+  }
+  .gua-cell:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .gua-cell .sym { font-size: 30px; line-height: 1.2; color: var(--ink); }
+  .gua-cell .nm { font-size: 14px; color: var(--gold); margin-top: 4px; letter-spacing: 1px; }
+  .gua-cell .no { font-size: 11px; color: var(--ink-dim); }
+
+  /* 弹窗 */
+  .modal-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 50; overflow-y: auto; padding: 40px 16px; }
+  .modal-mask.show { display: block; animation: fadein .25s; }
+  .modal { max-width: 720px; margin: 0 auto; background: var(--bg-card); border: 1px solid var(--gold-soft); border-radius: 10px; padding: 28px; position: relative; }
+  .modal .close { position: absolute; top: 12px; right: 16px; background: none; border: none; color: var(--ink-dim); font-size: 26px; cursor: pointer; }
+  .modal .close:hover { color: var(--gold); }
+  .modal h2 { color: var(--gold); font-size: 26px; letter-spacing: 3px; }
+  .modal .msym { font-size: 56px; float: right; margin: -8px 4px 0 0; }
+
+  .form-grid { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .form-grid label { color: var(--ink-dim); font-size: 14px; }
+  .form-grid input { width: 96px; }
+  .hint { color: var(--ink-dim); font-size: 13px; line-height: 1.8; margin-top: 10px; }
+
+  footer { text-align: center; color: #6e6451; font-size: 13px; margin-top: 40px; letter-spacing: 2px; line-height: 2; }
+  .divider { text-align: center; color: var(--gold-soft); margin: 6px 0 16px; letter-spacing: 6px; }
+
+  /* ---------- 移动端适配 ---------- */
+  html { -webkit-text-size-adjust: 100%; }
+  @media (max-width: 640px) {
+    .wrap { padding: 10px 10px 40px; }
+    header { padding: 18px 0 10px; }
+    h1 { font-size: 26px; letter-spacing: 8px; text-indent: 8px; }
+    .subtitle { font-size: 12px; letter-spacing: 2px; }
+    .tabs { gap: 6px; margin: 16px 0; }
+    .tab { padding: 10px 8px; font-size: 14px; letter-spacing: 1px; flex: 1 1 auto; text-align: center; }
+    .card { padding: 16px 13px; border-radius: 6px; }
+    .card h3 { font-size: 16px; letter-spacing: 2px; }
+    input[type=text], input[type=number], select { font-size: 16px; padding: 11px 10px; }
+    .question-row { flex-direction: column; }
+    .form-grid { gap: 8px; }
+    .form-grid input { width: 72px; flex: 1 1 60px; min-width: 0; }
+    .btn { padding: 13px 16px; font-size: 15px; letter-spacing: 2px; flex: 1 1 auto; }
+    .btn-row { gap: 8px; }
+    .coin { width: 52px; height: 52px; font-size: 13px; }
+    .coins { gap: 14px; min-height: 56px; }
+    .gua-pair { gap: 10px; }
+    .arrow { transform: rotate(90deg); padding: 0; width: 100%; text-align: center; font-size: 22px; }
+    .bar { width: 94px; height: 11px; }
+    .bar.yin .seg { width: 40px; }
+    .gua-title { font-size: 19px; }
+    .interp-grid { grid-template-columns: 1fr; gap: 9px; }
+    .interp-item { padding: 12px 13px; font-size: 14px; }
+    .yao-item { padding: 9px 10px; font-size: 14px; }
+    .classic { padding: 10px 12px; font-size: 14px; }
+    .verdict { font-size: 15px; padding: 12px 13px; }
+    .keynote { padding: 12px 13px; font-size: 14px; }
+    .gua-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .gua-cell { padding: 10px 2px; }
+    .gua-cell .sym { font-size: 26px; }
+    .gua-cell .nm { font-size: 12px; }
+    .modal-mask { padding: 16px 8px; }
+    .modal { padding: 20px 14px; }
+    .modal h2 { font-size: 21px; }
+    .modal .msym { font-size: 40px; }
+    .lost-flex { justify-content: center; gap: 8px; }
+    .lost-info { min-width: 0; width: 100%; }
+    footer { font-size: 12px; margin-top: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="taiji"></div>
+    <h1>周易占卜</h1>
+    <div class="subtitle">观变于阴阳而立卦 · 发挥于刚柔而生爻</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="coin">铜钱起卦</button>
+    <button class="tab" data-tab="time">时间起卦</button>
+    <button class="tab" data-tab="num">数字起卦</button>
+    <button class="tab" data-tab="lost">寻物占</button>
+    <button class="tab" data-tab="browse">六十四卦</button>
+  </div>
+
+  <!-- 铜钱起卦 -->
+  <div class="panel active" id="panel-coin">
+    <div class="card">
+      <h3>心诚则灵 · 三枚铜钱掷六次</h3>
+      <div class="question-row">
+        <input type="text" id="coin-question" placeholder="所问何事（可不填）：如事业、姻缘、出行……" maxlength="60">
+      </div>
+      <div class="coin-stage">
+        <div class="coins" id="coins">
+          <div class="coin"><span>乾隆</span></div>
+          <div class="coin"><span>乾隆</span></div>
+          <div class="coin"><span>乾隆</span></div>
+        </div>
+        <div class="toss-log" id="toss-log">默念所问之事，点击「掷卦」开始。字为阴（2），背为阳（3）。</div>
+        <div class="toss-count" id="toss-count"></div>
+        <div class="btn-row">
+          <button class="btn" id="btn-toss">掷 卦</button>
+          <button class="btn ghost" id="btn-auto">一键成卦</button>
+          <button class="btn ghost" id="btn-reset">重 起</button>
+        </div>
+      </div>
+    </div>
+    <div id="coin-result"></div>
+  </div>
+
+  <!-- 时间起卦 -->
+  <div class="panel" id="panel-time">
+    <div class="card">
+      <h3>梅花易数 · 以时起卦</h3>
+      <div class="form-grid">
+        <label>年份</label><input type="number" id="t-year" min="1900" max="2200">
+        <label>月</label><input type="number" id="t-month" min="1" max="12">
+        <label>日</label><input type="number" id="t-day" min="1" max="31">
+        <label>时（0-23）</label><input type="number" id="t-hour" min="0" max="23">
+      </div>
+      <div class="question-row">
+        <input type="text" id="time-question" placeholder="所问何事（可不填）" maxlength="60">
+      </div>
+      <div class="btn-row"><button class="btn" id="btn-time">起 卦</button></div>
+      <div class="hint">法依《梅花易数》：年支数加月、日之和除以八取上卦；再加时支数除以八取下卦；总数除以六取动爻。传统以农历为准，此处按所填数值直接推算，如欲从古法可自行填入农历月日。</div>
+    </div>
+    <div id="time-result"></div>
+  </div>
+
+  <!-- 数字起卦 -->
+  <div class="panel" id="panel-num">
+    <div class="card">
+      <h3>梅花易数 · 以数起卦</h3>
+      <div class="form-grid">
+        <label>第一数（上卦）</label><input type="number" id="n1" min="1" placeholder="任意数">
+        <label>第二数（下卦）</label><input type="number" id="n2" min="1" placeholder="任意数">
+      </div>
+      <div class="question-row">
+        <input type="text" id="num-question" placeholder="所问何事（可不填）" maxlength="60">
+      </div>
+      <div class="btn-row"><button class="btn" id="btn-num">起 卦</button></div>
+      <div class="hint">心中默想所问之事，随意报出两个数字（如时刻、页码、车牌尾数）。第一数除以八取上卦，第二数除以八取下卦，两数之和除以六取动爻。</div>
+    </div>
+    <div id="num-result"></div>
+  </div>
+
+  <!-- 寻物占 -->
+  <div class="panel" id="panel-lost">
+    <div class="card">
+      <h3>梅花易数 · 占失物方位</h3>
+      <div class="question-row">
+        <input type="text" id="lost-item" placeholder="丢了什么（可不填）：如钥匙、钱包、证件、手机……" maxlength="40">
+      </div>
+      <div class="form-grid">
+        <label>第一数（上卦）</label><input type="number" id="l1" min="1" placeholder="任意数">
+        <label>第二数（下卦）</label><input type="number" id="l2" min="1" placeholder="任意数">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btn-lost-num">以数起卦</button>
+        <button class="btn ghost" id="btn-lost-time">以此刻时间起卦</button>
+      </div>
+      <div class="hint">心中默念所失之物，随意报两数起卦；急寻时也可直接以当下时刻起卦。依《梅花易数》占失物之法：动爻所在为用卦，以用卦配后天八卦定<b>方位</b>、以用卦类象断<b>场所</b>、以动爻爻位断<b>高低远近</b>、以体用五行生克断<b>可否寻回</b>。</div>
+    </div>
+    <div id="lost-result"></div>
+  </div>
+
+  <!-- 六十四卦浏览 -->
+  <div class="panel" id="panel-browse">
+    <div class="card">
+      <h3>六十四卦一览 · 点击查看详解</h3>
+      <div class="gua-grid" id="gua-grid"></div>
+    </div>
+  </div>
+
+  <footer>
+    「善为易者不占」—— 本应用旨在传统文化学习与娱乐，卦辞爻辞取自通行本《周易》。<br>
+    人生之路，操之在己；占卜之言，仅供参考。
+  </footer>
+</div>
+
+<div class="modal-mask" id="modal-mask">
+  <div class="modal">
+    <button class="close" id="modal-close">×</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="data-01-16.js"></script>
+<script src="data-17-32.js"></script>
+<script src="data-33-48.js"></script>
+<script src="data-49-64.js"></script>
+<script>
+(function () {
+  var DATA = window.GUA_DATA || {};
+  var byKey = {};
+  Object.keys(DATA).forEach(function (k) {
+    var g = DATA[k];
+    if (g && g.lines) byKey[g.lines.join("")] = g;
+  });
+
+  function guaByLines(lines) { return byKey[lines.join("")]; }
+
+  /* ---------- 标签页 ---------- */
+  document.querySelectorAll(".tab").forEach(function (t) {
+    t.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (x) { x.classList.remove("active"); });
+      document.querySelectorAll(".panel").forEach(function (x) { x.classList.remove("active"); });
+      t.classList.add("active");
+      document.getElementById("panel-" + t.dataset.tab).classList.add("active");
+    });
+  });
+
+  /* ---------- 卦象绘制 ---------- */
+  // vals: 6 个数（6/7/8/9）或 0/1；moving: 动爻下标数组
+  function figureHTML(label, gua, lines, movingIdx, marks) {
+    var rows = "";
+    for (var i = 0; i < 6; i++) {
+      var yang = lines[i] === 1;
+      var mv = movingIdx && movingIdx.indexOf(i) >= 0;
+      var mark = mv ? (marks && marks[i] ? marks[i] : "●") : "";
+      rows += '<div class="yao-row' + (mv ? " moving" : "") + '">' +
+        '<div class="bar ' + (yang ? "yang" : "yin") + '">' +
+        (yang ? '<div class="seg"></div>' : '<div class="seg"></div><div class="seg"></div>') +
+        '</div><div class="mark">' + mark + "</div></div>";
+    }
+    return '<div class="gua-figure"><div class="glabel">' + label + '</div>' +
+      '<div class="glines">' + rows + "</div>" +
+      '<div class="gua-title">' + (gua ? gua.full : "未知") + "</div>" +
+      '<div class="gua-sub">' + (gua ? "第" + gua.n + "卦 · " + gua.trigram + " · " + gua.brief : "") + "</div></div>";
+  }
+
+  function classicHTML(gua) {
+    return '<div class="classic"><span class="tag">卦辞</span>' + gua.guaci + "</div>" +
+      '<div class="classic"><span class="tag">象曰</span>' + gua.xiang + "</div>";
+  }
+
+  function interpHTML(gua) {
+    var it = gua.interp || {};
+    var items = [["总体运势", it.overall], ["事业学业", it.career], ["感情婚恋", it.love], ["财运求财", it.wealth], ["健康平安", it.health]];
+    return '<div class="interp-grid">' + items.map(function (p) {
+      return p[1] ? '<div class="interp-item"><b>' + p[0] + "</b>" + p[1] + "</div>" : "";
+    }).join("") + "</div>";
+  }
+
+  var YAO_NAMES = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
+  function yaoListHTML(gua, movingIdx) {
+    var html = '<div class="yao-list">';
+    for (var i = 5; i >= 0; i--) {
+      var y = (gua.yao || [])[i];
+      if (!y) continue;
+      var hot = movingIdx && movingIdx.indexOf(i) >= 0;
+      html += '<div class="yao-item' + (hot ? " hot" : "") + '">' +
+        (hot ? "▶ " : "") + y.text +
+        '<div class="yg">' + YAO_NAMES[i] + " · " + (y.gloss || "") + "</div></div>";
+    }
+    return html + "</div>";
+  }
+
+  // 依朱子断卦法给出解卦要点
+  function keynoteHTML(ben, zhi, movingIdx) {
+    var n = movingIdx.length, msg;
+    function yaoText(g, i) { return g.yao && g.yao[i] ? g.yao[i].text : ""; }
+    if (n === 0) {
+      msg = "六爻安静，以本卦卦辞断之。细读「" + ben.guaci + "」，参照下方解读即可。";
+    } else if (n === 1) {
+      msg = "一爻动，以动爻爻辞为断。重点体会：「" + yaoText(ben, movingIdx[0]) + "」";
+    } else if (n === 2) {
+      var hi = movingIdx[movingIdx.length - 1];
+      msg = "二爻动，以上动之爻为主。重点体会：「" + yaoText(ben, hi) + "」，兼参另一动爻。";
+    } else if (n === 3) {
+      msg = "三爻动，本卦、变卦卦辞并参：本卦「" + ben.guaci + "」，变卦「" + (zhi ? zhi.guaci : "") + "」。";
+    } else if (n <= 5) {
+      msg = "多爻齐动，以变卦为主断之。细读变卦" + (zhi ? "「" + zhi.full + "」之卦辞：「" + zhi.guaci + "」" : "") + "。";
+    } else {
+      if (ben.n === 1) msg = "六爻皆动，乾卦用九：「见群龙无首，吉。」群阳齐变而不争首，是大吉之象。";
+      else if (ben.n === 2) msg = "六爻皆动，坤卦用六：「利永贞。」守持正固，终久有利。";
+      else msg = "六爻皆动，以变卦卦辞断之：「" + (zhi ? zhi.guaci : "") + "」。";
+    }
+    return '<div class="keynote"><b>断卦要点</b> · ' + msg + "</div>";
+  }
+
+  /* ---------- 所问断语引擎 ---------- */
+  var CATS = [
+    { key: "career", label: "事业谋望", kws: ["工作", "事业", "升职", "晋升", "跳槽", "面试", "职位", "入职", "离职", "辞职", "创业", "项目", "老板", "上司", "同事", "公司", "岗位", "调动", "应聘", "转行", "生意伙伴"] },
+    { key: "study", label: "学业考试", kws: ["考试", "考研", "考公", "学业", "学习", "升学", "高考", "中考", "论文", "成绩", "录取", "读研", "留学", "考证"] },
+    { key: "love", label: "感情婚恋", kws: ["感情", "恋爱", "爱情", "结婚", "婚姻", "姻缘", "对象", "喜欢", "表白", "复合", "分手", "相亲", "恋人", "男友", "女友", "女朋友", "男朋友", "桃花", "脱单", "追求", "追她", "追他"] },
+    { key: "wealth", label: "财运求财", kws: ["财", "钱", "投资", "股票", "基金", "生意", "买卖", "收益", "欠债", "借款", "赚", "亏", "理财", "彩票", "买房", "卖房", "订单", "回款", "工资", "奖金"] },
+    { key: "health", label: "健康平安", kws: ["健康", "疾病", "生病", "身体", "手术", "康复", "体检", "平安", "病"] },
+    { key: "travel", label: "出行迁移", kws: ["出行", "旅行", "旅游", "出差", "搬家", "搬迁", "出国", "远行", "迁居", "移民", "回家"] },
+    { key: "lawsuit", label: "词讼纠纷", kws: ["官司", "诉讼", "纠纷", "仲裁", "法院", "起诉", "维权", "赔偿"] },
+    { key: "lost", label: "寻人寻物", kws: ["失物", "丢了", "丢失", "寻找", "找回", "走失", "寻人", "找到"] },
+    { key: "people", label: "人际合作", kws: ["合作", "合伙", "朋友", "人际", "关系", "贵人", "小人", "谈判", "签约", "客户"] }
+  ];
+  var CAT_FIELD = { career: "career", study: "career", love: "love", wealth: "wealth", health: "health" };
+
+  function detectCat(q) {
+    if (!q) return null;
+    for (var i = 0; i < CATS.length; i++)
+      for (var j = 0; j < CATS[i].kws.length; j++)
+        if (q.indexOf(CATS[i].kws[j]) >= 0) return CATS[i];
+    return { key: "overall", label: "综合谋望" };
+  }
+
+  // 经文吉凶用语评分（按序匹配并剔除，避免「无咎」误计「咎」等）
+  var SCORE_RULES = [["元亨", 3], ["大吉", 3], ["无不利", 2], ["不利", -2], ["无咎", 1], ["悔亡", 1], ["无悔", 1], ["勿用", -1], ["凶", -3], ["厉", -2], ["吝", -1], ["悔", -1], ["咎", -1], ["吉", 2], ["亨", 2], ["利", 1]];
+  function scoreText(t) {
+    if (!t) return 0;
+    var s = 0;
+    SCORE_RULES.forEach(function (r) {
+      var parts = t.split(r[0]);
+      if (parts.length > 1) { s += (parts.length - 1) * r[1]; t = parts.join(""); }
+    });
+    return s;
+  }
+
+  // 依朱子断卦法选出主断/参断文本
+  function governingTexts(ben, zhi, moving) {
+    function yy(g, i) { return g.yao && g.yao[i] ? g.yao[i] : null; }
+    var arr = [], n = moving.length;
+    if (n === 0) {
+      arr.push({ label: "主断 · 本卦卦辞", text: ben.guaci });
+    } else if (n === 1) {
+      var y = yy(ben, moving[0]);
+      if (y) arr.push({ label: "主断 · 动爻爻辞", text: y.text, gloss: y.gloss });
+    } else if (n === 2) {
+      var a = yy(ben, moving[moving.length - 1]), b = yy(ben, moving[0]);
+      if (a) arr.push({ label: "主断 · 上动之爻", text: a.text, gloss: a.gloss });
+      if (b) arr.push({ label: "参断 · 下动之爻", text: b.text, gloss: b.gloss });
+    } else if (n === 3) {
+      arr.push({ label: "主断 · 本卦卦辞", text: ben.guaci });
+      if (zhi) arr.push({ label: "参断 · 变卦卦辞", text: zhi.guaci });
+    } else if (n < 6) {
+      if (zhi) arr.push({ label: "主断 · 变卦卦辞", text: zhi.guaci });
+      arr.push({ label: "参断 · 本卦卦辞", text: ben.guaci });
+    } else {
+      if (ben.extra) arr.push({ label: "主断 · 用辞", text: ben.extra });
+      else if (zhi) arr.push({ label: "主断 · 变卦卦辞", text: zhi.guaci });
+    }
+    return arr;
+  }
+
+  var LEVELS = [
+    { min: 4, name: "上吉", cls: "good", text: "卦象明朗，大体可成，可放手推进、趁势而为。" },
+    { min: 2, name: "吉", cls: "good", text: "趋势向好，把握分寸、按部就班即可有成。" },
+    { min: 0, name: "中平", cls: "mid", text: "成败参半，谋事在人，关键在自身经营与耐心。" },
+    { min: -2, name: "谨慎", cls: "warn", text: "阻力不小，宜缓不宜急，须防反复，稳守待时为上。" },
+    { min: -99, name: "不宜", cls: "warn", text: "时机未至，不宜强求，暂且退守蓄力，另待其时。" }
+  ];
+
+  var POS_MSG = [
+    "动在初爻——事属初始，根基未固，宜稳扎稳打，不可冒进。",
+    "动在二爻——事在酝酿，居中而正，循序渐进则有成。",
+    "动在三爻——事至中途，内外交接之地，多有波折，谨慎转圜。",
+    "动在四爻——事已近成，愈近关键愈须收敛，进退要有分寸。",
+    "动在五爻——事在枢要，居尊得势，多得有力者相助主持。",
+    "动在上爻——事势已极，物极必反，宜收束善后，不宜再进。"
+  ];
+
+  function trendText(ben, zhi) {
+    if (!zhi) return "六爻安静，卦势专一，事体可依本卦之义直断。";
+    var a = scoreText(ben.guaci), b = scoreText(zhi.guaci);
+    var base = "本卦【" + ben.full + "】之变卦【" + zhi.full + "】，";
+    if (b - a >= 2) return base + "卦势渐开，先难后易，事态趋于好转。";
+    if (a - b >= 2) return base + "卦势由盛而敛，先易后难，宜速定速决、防其后变。";
+    return base + "卦势平稳相承，循常理而行即可。";
+  }
+
+  function conclusionHTML(ben, zhi, moving, question) {
+    var cat = detectCat(question);
+    var catLabel = cat ? cat.label : "综合运势";
+    var field = cat ? (CAT_FIELD[cat.key] || "overall") : "overall";
+    var texts = governingTexts(ben, zhi, moving);
+    var sc = 0;
+    texts.forEach(function (t, i) { sc += scoreText(t.text) * (i === 0 ? 1 : 0.6); });
+    var lv;
+    for (var i = 0; i < LEVELS.length; i++) { if (sc >= LEVELS[i].min) { lv = LEVELS[i]; break; } }
+
+    var html = '<div class="card"><h3>所问断语</h3>';
+    html += '<div class="gua-sub" style="margin-bottom:6px">问事类别：' + catLabel +
+      (question ? ' · 「' + escapeHTML(question) + '」' : "（未填所问，按综合运势断）") + "</div>";
+    html += '<div class="verdict ' + lv.cls + '"><span class="lv">断曰 · ' + lv.name + "</span>" +
+      (cat ? "就「" + catLabel + "」而言，" : "") + lv.text + "</div>";
+    html += texts.map(function (t) {
+      return '<div class="classic"><span class="tag">' + t.label + "</span>" + t.text +
+        (t.gloss ? '<div style="color:var(--ink-dim);font-size:14px;margin-top:4px">' + t.gloss + "</div>" : "") + "</div>";
+    }).join("");
+
+    var notes = [trendText(ben, zhi)];
+    if (moving.length >= 1 && moving.length <= 2) moving.forEach(function (i) { notes.push(POS_MSG[i]); });
+    else if (moving.length > 2) notes.push("动爻众多，事局变动较大，重心在于顺应变卦所示之方向。");
+    html += '<div class="interp-item" style="margin-top:10px"><b>卦势走向</b>' + notes.join("<br>") + "</div>";
+
+    var adv = (ben.interp && ben.interp[field]) || "";
+    html += '<div class="interp-item" style="margin-top:10px"><b>就此事之建议</b>' + adv;
+    if (zhi && zhi.interp && zhi.interp[field]) html += "<br><span style='color:var(--ink-dim)'>后续走向（变卦" + zhi.full + "）：</span>" + zhi.interp[field];
+    html += "</div></div>";
+    return html;
+  }
+
+  // 综合渲染一次占卜结果。vals: 六爻数值(6/7/8/9)，自下而上
+  function renderResult(container, vals, question, sourceNote) {
+    var benLines = vals.map(function (v) { return v % 2; });      // 7,9→1 阳；6,8→0 阴
+    var moving = [];
+    vals.forEach(function (v, i) { if (v === 6 || v === 9) moving.push(i); });
+    var marks = {};
+    vals.forEach(function (v, i) { if (v === 9) marks[i] = "○"; if (v === 6) marks[i] = "✕"; });
+    var zhiLines = vals.map(function (v) { return v === 9 ? 0 : v === 6 ? 1 : v % 2; });
+    var ben = guaByLines(benLines);
+    var zhi = moving.length ? guaByLines(zhiLines) : null;
+    if (!ben) { container.innerHTML = '<div class="card">卦象数据缺失，请确认 data-*.js 文件完整。</div>'; return; }
+
+    var html = '<div class="card">';
+    if (question) html += '<div class="divider">— 所问：' + escapeHTML(question) + " —</div>";
+    if (sourceNote) html += '<div class="gua-sub" style="text-align:center;margin-bottom:12px">' + sourceNote + "</div>";
+    html += '<div class="gua-pair">' + figureHTML(zhi ? "本卦" : "本卦（六爻安静）", ben, benLines, moving, marks);
+    if (zhi) html += '<div class="arrow">☞</div>' + figureHTML("变卦", zhi, zhiLines, [], {});
+    html += "</div></div>";
+
+    html += conclusionHTML(ben, zhi, moving, question);
+
+    html += '<div class="card"><h3>' + ben.full + " · 经文</h3>" + classicHTML(ben);
+    if (ben.extra && moving.length === 6) html += '<div class="classic"><span class="tag">用辞</span>' + ben.extra + "</div>";
+    html += keynoteHTML(ben, zhi, moving) + "</div>";
+
+    html += '<div class="card"><h3>白话解读</h3>' + interpHTML(ben) + "</div>";
+    html += '<div class="card"><h3>六爻爻辞' + (moving.length ? "（▶ 为动爻）" : "") + "</h3>" + yaoListHTML(ben, moving) + "</div>";
+    if (zhi) html += '<div class="card"><h3>变卦 · ' + zhi.full + "</h3>" + classicHTML(zhi) +
+      '<div class="interp-item" style="margin-top:10px"><b>变卦提示</b>' + (zhi.interp ? zhi.interp.overall : "") + "</div></div>";
+
+    container.innerHTML = html;
+    container.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function escapeHTML(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  /* ---------- 铜钱起卦 ---------- */
+  var tossVals = [];
+  var YAO_LABEL = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
+  var tossing = false;
+
+  function tossOnce(silent) {
+    var coins = [], sum = 0;
+    for (var i = 0; i < 3; i++) { var c = Math.random() < 0.5 ? 2 : 3; coins.push(c); sum += c; }
+    tossVals.push(sum);
+    if (!silent) {
+      var els = document.querySelectorAll("#coins .coin");
+      els.forEach(function (el, i) {
+        el.classList.remove("flip"); void el.offsetWidth; el.classList.add("flip");
+        setTimeout(function () { el.querySelector("span").textContent = coins[i] === 2 ? "字" : "背"; }, 250);
+      });
+      var names = { 6: "老阴 ✕（动）", 7: "少阳", 8: "少阴", 9: "老阳 ○（动）" };
+      document.getElementById("toss-log").textContent =
+        "第" + tossVals.length + "掷（" + YAO_LABEL[tossVals.length - 1] + "）：" +
+        coins.map(function (c) { return c === 2 ? "字" : "背"; }).join(" ") + " → " + names[sum];
+    }
+    document.getElementById("toss-count").textContent = "已成 " + tossVals.length + " / 6 爻";
+    if (tossVals.length === 6) {
+      document.getElementById("btn-toss").disabled = true;
+      setTimeout(function () {
+        renderResult(document.getElementById("coin-result"), tossVals,
+          document.getElementById("coin-question").value.trim(), "铜钱起卦 · 三枚六掷");
+      }, silent ? 100 : 600);
+    }
+  }
+
+  document.getElementById("btn-toss").addEventListener("click", function () {
+    if (tossVals.length >= 6 || tossing) return;
+    tossing = true; tossOnce(false);
+    setTimeout(function () { tossing = false; }, 550);
+  });
+  document.getElementById("btn-auto").addEventListener("click", function () {
+    if (tossVals.length >= 6) return;
+    while (tossVals.length < 6) tossOnce(tossVals.length < 5);
+  });
+  document.getElementById("btn-reset").addEventListener("click", function () {
+    tossVals = [];
+    document.getElementById("btn-toss").disabled = false;
+    document.getElementById("toss-log").textContent = "默念所问之事，点击「掷卦」开始。字为阴（2），背为阳（3）。";
+    document.getElementById("toss-count").textContent = "";
+    document.getElementById("coin-result").innerHTML = "";
+    document.querySelectorAll("#coins .coin span").forEach(function (s) { s.textContent = "乾隆"; });
+  });
+
+  /* ---------- 梅花易数公共 ---------- */
+  // 先天八卦数 1乾 2兑 3离 4震 5巽 6坎 7艮 8坤 → 三爻（自下而上）
+  var XIANTIAN = {
+    1: [1, 1, 1], 2: [1, 1, 0], 3: [1, 0, 1], 4: [1, 0, 0],
+    5: [0, 1, 1], 6: [0, 1, 0], 7: [0, 0, 1], 8: [0, 0, 0]
+  };
+  function mod(n, m) { var r = n % m; return r === 0 ? m : r; }
+
+  function meihuaResult(container, upNum, downNum, movingNum, question, note) {
+    var up = XIANTIAN[mod(upNum, 8)], down = XIANTIAN[mod(downNum, 8)];
+    var moveIdx = mod(movingNum, 6) - 1;                     // 动爻位（自下而上 0-5）
+    var lines = down.concat(up);
+    var vals = lines.map(function (b, i) {
+      if (i === moveIdx) return b === 1 ? 9 : 6;             // 动爻取老阳/老阴
+      return b === 1 ? 7 : 8;
+    });
+    renderResult(container, vals, question, note);
+  }
+
+  /* ---------- 时间起卦 ---------- */
+  var now = new Date();
+  document.getElementById("t-year").value = now.getFullYear();
+  document.getElementById("t-month").value = now.getMonth() + 1;
+  document.getElementById("t-day").value = now.getDate();
+  document.getElementById("t-hour").value = now.getHours();
+
+  var ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+  document.getElementById("btn-time").addEventListener("click", function () {
+    var y = +document.getElementById("t-year").value,
+      m = +document.getElementById("t-month").value,
+      d = +document.getElementById("t-day").value,
+      h = +document.getElementById("t-hour").value;
+    if (!y || !m || !d || isNaN(h)) return;
+    var yearZhi = mod(y - 3, 12);                             // 年支序：子1…亥12
+    var hourZhi = (Math.floor((h + 1) / 2) % 12) + 1;         // 时支序：23-1点为子1
+    var upSum = yearZhi + m + d;
+    var downSum = upSum + hourZhi;
+    var note = "时间起卦 · " + y + "年（" + ZHI[yearZhi - 1] + "）" + m + "月" + d + "日 " +
+      ZHI[hourZhi - 1] + "时 · 上卦" + mod(upSum, 8) + " 下卦" + mod(downSum, 8) + " 动爻" + mod(downSum, 6);
+    meihuaResult(document.getElementById("time-result"), upSum, downSum, downSum,
+      document.getElementById("time-question").value.trim(), note);
+  });
+
+  /* ---------- 数字起卦 ---------- */
+  document.getElementById("btn-num").addEventListener("click", function () {
+    var a = +document.getElementById("n1").value, b = +document.getElementById("n2").value;
+    if (!a || !b || a < 1 || b < 1) {
+      document.getElementById("num-result").innerHTML = '<div class="card">请填入两个正整数。</div>';
+      return;
+    }
+    var note = "数字起卦 · " + a + "、" + b + " · 上卦" + mod(a, 8) + " 下卦" + mod(b, 8) + " 动爻" + mod(a + b, 6);
+    meihuaResult(document.getElementById("num-result"), a, b, a + b,
+      document.getElementById("num-question").value.trim(), note);
+  });
+
+  /* ---------- 寻物占 ---------- */
+  var TRI_KEY = { "111": 1, "110": 2, "101": 3, "100": 4, "011": 5, "010": 6, "001": 7, "000": 8 };
+  var TRI_INFO = {
+    1: { name: "乾", wx: "金", dir: "西北", deg: 315, place: "高处、楼上架顶、金属器物旁、公门大厦、圆形器物之中", note: "乾为金为圆，物或与金属、贵重之品同处" },
+    2: { name: "兑", wx: "金", dir: "西", deg: 270, place: "井泉水泽边、残缺破损之处、废弃杂物间、柜口袋口", note: "兑为毁折为口，物或有磕碰，或在容器开口处" },
+    3: { name: "离", wx: "火", dir: "南", deg: 180, place: "明亮向阳处、炉灶厨房、文书书册之间、灯火电器旁", note: "离为明为文，物多在显眼处，只是灯下黑未曾细看" },
+    4: { name: "震", wx: "木", dir: "东", deg: 90, place: "树木之旁、大路闹市、木器之中、楼梯过道、鞋履之间", note: "震为动为足，物或因走动携带而失，多在途中" },
+    5: { name: "巽", wx: "木", dir: "东南", deg: 135, place: "草木之间、绳带长物旁、床席橱柜、通风走廊", note: "巽为风为绳，物或被长条之物覆压，或随风飘落" },
+    6: { name: "坎", wx: "水", dir: "北", deg: 0, place: "水边湿处、卫生间水管旁、沟渠低洼、暗处夹缝", note: "坎为水为隐伏，物在阴暗低洼处，须持灯细找" },
+    7: { name: "艮", wx: "土", dir: "东北", deg: 45, place: "墙角门槛、台阶山石旁、柜箱之中、静置不动之处", note: "艮为止为山，物安然未动，多在屋内角落" },
+    8: { name: "坤", wx: "土", dir: "西南", deg: 225, place: "平地土中、布袋衣物之间、旧物堆、仓库储藏之处", note: "坤为地为布帛，物或被衣物布类掩盖" }
+  };
+  var SHENG = { "金": "水", "水": "木", "木": "火", "火": "土", "土": "金" };
+  var KE = { "金": "木", "木": "土", "土": "水", "水": "火", "火": "金" };
+  var LOST_POS = [
+    "动在初爻——物在低处贴地：床下、柜底、地面缝隙之类，且离你不远。",
+    "动在二爻——物在屋内半低之处：抽屉、椅凳之下、随手可及的地方。",
+    "动在三爻——物在门户内外交接处：门口、玄关、包袋夹层。",
+    "动在四爻——物已出门在外：邻近之处、常去的场所，循来路可寻。",
+    "动在五爻——物在外且处显要：道路、公共场所，或已在他人手中。",
+    "动在上爻——物在高处或远处：架顶高阁之上，或已远离，须扩大范围。"
+  ];
+  function triOf(bits) { return TRI_INFO[TRI_KEY[bits.join("")]]; }
+  function tyRelation(ti, yong) {
+    if (ti.wx === yong.wx) return { name: "体用比和", cls: "good", text: "失物未曾远离，多在惯常放置之处附近，静下心来细找便可寻回。" };
+    if (SHENG[yong.wx] === ti.wx) return { name: "用生体 · 可寻", cls: "good", text: "失物可寻，甚或有人代为收起、送还，近日自现，不必焦急。" };
+    if (KE[ti.wx] === yong.wx) return { name: "体克用 · 费力可得", cls: "mid", text: "可以寻回，但须费一番功夫，多翻找几处、多问几人方见。" };
+    if (SHENG[ti.wx] === yong.wx) return { name: "体生用 · 宜速寻", cls: "warn", text: "寻之费力，失物有渐行渐远之象，宜趁早循迹寻找，迟则难得。" };
+    return { name: "用克体 · 难寻", cls: "warn", text: "较难寻回，物或被人拾去、或已受损。尽力一寻即可，不必过于执念。" };
+  }
+  function lostReading(a, b, dong) {
+    var upBits = XIANTIAN[mod(a, 8)], downBits = XIANTIAN[mod(b, 8)];
+    var moveIdx = mod(dong, 6) - 1;
+    var lines = downBits.concat(upBits);
+    var ben = guaByLines(lines);
+    var zlines = lines.slice(); zlines[moveIdx] = 1 - zlines[moveIdx];
+    var zhi = guaByLines(zlines);
+    var yongIsUp = moveIdx >= 3;
+    var yong = triOf(yongIsUp ? lines.slice(3) : lines.slice(0, 3));
+    var ti = triOf(yongIsUp ? lines.slice(0, 3) : lines.slice(3));
+    var second = triOf(yongIsUp ? zlines.slice(3) : zlines.slice(0, 3));
+    return { ben: ben, zhi: zhi, moveIdx: moveIdx, yong: yong, ti: ti, second: second, rel: tyRelation(ti, yong) };
+  }
+  function compassHTML(deg) {
+    var dirs = [["北", 0], ["东北", 45], ["东", 90], ["东南", 135], ["南", 180], ["西南", 225], ["西", 270], ["西北", 315]];
+    var s = '<svg width="190" height="190" viewBox="0 0 200 200">';
+    s += '<circle cx="100" cy="100" r="86" fill="none" stroke="#3a3327" stroke-width="1.5"/>';
+    s += '<circle cx="100" cy="100" r="58" fill="none" stroke="#3a3327" stroke-width="0.6"/>';
+    for (var i = 0; i < dirs.length; i++) {
+      var rad = dirs[i][1] * Math.PI / 180;
+      var x = 100 + 73 * Math.sin(rad), y = 100 - 73 * Math.cos(rad);
+      var hot = dirs[i][1] === deg;
+      s += '<text x="' + x.toFixed(1) + '" y="' + (y + 5).toFixed(1) + '" text-anchor="middle" font-size="' + (hot ? 17 : 12) +
+        '" fill="' + (hot ? "#c9a227" : "#a49a85") + '"' + (hot ? ' font-weight="bold"' : "") + ">" + dirs[i][0] + "</text>";
+    }
+    s += '<g transform="rotate(' + deg + ' 100 100)"><polygon points="100,42 92,106 100,93 108,106" fill="#c9a227"/></g>';
+    s += '<circle cx="100" cy="100" r="4" fill="#c9a227"/></svg>';
+    return s;
+  }
+  function buildLostHTML(r, item, note) {
+    var html = '<div class="card"><h3>寻物断</h3>';
+    if (item) html += '<div class="divider">— 所寻：' + escapeHTML(item) + " —</div>";
+    html += '<div class="gua-sub" style="text-align:center;margin-bottom:10px">' + note +
+      " · 得【" + (r.ben ? r.ben.full : "？") + "】之【" + (r.zhi ? r.zhi.full : "？") + "】 · 体卦" +
+      r.ti.name + "（" + r.ti.wx + "） 用卦" + r.yong.name + "（" + r.yong.wx + "）</div>";
+    html += '<div class="verdict ' + r.rel.cls + '"><span class="lv">' + r.rel.name + "</span>" + r.rel.text + "</div>";
+    html += '<div class="lost-flex"><div>' + compassHTML(r.yong.deg) + "</div>";
+    html += '<div class="lost-info">';
+    html += '<div class="interp-item"><b>方位 · ' + r.yong.dir + "</b>以失物之处（或家宅）为中心，往<b style=\"color:var(--gold)\">" + r.yong.dir + "</b>方向寻找。" + r.yong.note + "。</div>";
+    html += '<div class="interp-item" style="margin-top:10px"><b>场所</b>' + r.yong.place + "。</div>";
+    html += '<div class="interp-item" style="margin-top:10px"><b>高低远近</b>' + LOST_POS[r.moveIdx] + "</div>";
+    if (r.second && r.second.dir !== r.yong.dir)
+      html += '<div class="interp-item" style="margin-top:10px"><b>再寻之方</b>若' + r.yong.dir + "方寻之不获，动爻既变，用卦化为" + r.second.name + "，可再往<b style=\"color:var(--gold)\">" + r.second.dir + "</b>方一探。</div>";
+    html += "</div></div></div>";
+    return html;
+  }
+  /* lost-dom-wiring */
+  function showLost(a, b, dong, note) {
+    var item = document.getElementById("lost-item").value.trim();
+    var box = document.getElementById("lost-result");
+    box.innerHTML = buildLostHTML(lostReading(a, b, dong), item, note);
+    box.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  document.getElementById("btn-lost-num").addEventListener("click", function () {
+    var a = +document.getElementById("l1").value, b = +document.getElementById("l2").value;
+    if (!a || !b || a < 1 || b < 1) {
+      document.getElementById("lost-result").innerHTML = '<div class="card">请填入两个正整数。</div>';
+      return;
+    }
+    showLost(a, b, a + b, "数字起卦 · " + a + "、" + b);
+  });
+  document.getElementById("btn-lost-time").addEventListener("click", function () {
+    var d = new Date();
+    var yearZhi = mod(d.getFullYear() - 3, 12);
+    var hourZhi = (Math.floor((d.getHours() + 1) / 2) % 12) + 1;
+    var upSum = yearZhi + (d.getMonth() + 1) + d.getDate();
+    var downSum = upSum + hourZhi;
+    showLost(upSum, downSum, downSum,
+      "时间起卦 · " + d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日 " + ZHI[hourZhi - 1] + "时");
+  });
+
+  /* ---------- 六十四卦浏览 ---------- */
+  var grid = document.getElementById("gua-grid");
+  var cells = "";
+  for (var i = 1; i <= 64; i++) {
+    var g = DATA[i];
+    if (!g) continue;
+    cells += '<div class="gua-cell" data-n="' + i + '"><div class="sym">' + g.symbol +
+      '</div><div class="nm">' + g.full + '</div><div class="no">第' + i + "卦</div></div>";
+  }
+  grid.innerHTML = cells || '<div class="hint">卦库数据未加载，请确认 data-*.js 与本页在同一文件夹。</div>';
+  grid.addEventListener("click", function (e) {
+    var cell = e.target.closest(".gua-cell");
+    if (!cell) return;
+    var g = DATA[+cell.dataset.n];
+    if (!g) return;
+    document.getElementById("modal-body").innerHTML =
+      '<div class="msym">' + g.symbol + "</div><h2>" + g.full + "</h2>" +
+      '<div class="gua-sub">第' + g.n + "卦 · " + g.trigram + " · " + g.brief + "</div><br>" +
+      classicHTML(g) +
+      (g.extra ? '<div class="classic"><span class="tag">用辞</span>' + g.extra + "</div>" : "") +
+      interpHTML(g) +
+      '<h3 style="color:var(--gold);margin:16px 0 4px;letter-spacing:2px">六爻爻辞</h3>' + yaoListHTML(g, []);
+    document.getElementById("modal-mask").classList.add("show");
+  });
+  document.getElementById("modal-close").addEventListener("click", function () {
+    document.getElementById("modal-mask").classList.remove("show");
+  });
+  document.getElementById("modal-mask").addEventListener("click", function (e) {
+    if (e.target === this) this.classList.remove("show");
+  });
+})();
+</script>
+</body>
+</html>
